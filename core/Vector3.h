@@ -112,6 +112,18 @@ public:
 		return *this;
 	}
 
+	/** sub */
+	Vector3 operator-(const Vector3& vec) const
+	{
+		Vector3 ret = *this;
+
+		ret.x -= vec.x;
+		ret.y -= vec.y;
+		ret.z -= vec.z;
+
+		return ret;
+	}
+
 	/** add */
 	Vector3 operator+(const Vector3& vec) const
 	{

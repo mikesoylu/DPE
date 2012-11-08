@@ -12,7 +12,7 @@ class Emitter
 {
 protected:
 	vector<EmittedParticle> particles;
-	
+
 	double life;
 	double lifeVar;
 
@@ -34,45 +34,42 @@ public:
 	/** Emits n particles at once */
 	void Emit(int n)
 	{
-		// shal we skip looking for dead particles
-		bool skip = false;
 
 		for (int i = 0; i < n; i++)
 		{
-			bool found = false;
-			if (!skip)
-				for (int j = 0; j < particles.Size(); j++)
-					if (!particles[j].GetAlive())
-					{
-						particles[j].Revive(position, life + Utils::Random() * liveVar);
+            // we coldn't find any dead so stop looking
+            EmittedParticle p(position, life + Util::Random() * lifeVar);
 
-						Vector3 v = velocity;
-						v += velocityVar * Utils::Random() * 2 - velocityVar;
-						particles[j].velocity = v;
+            Vector3 v = velocity;
+            v += velocityVar * Util::Random() * 2 - velocityVar;
+            p.SetVelocity(v);
 
-						found = true;
-					} 
-
-			if (!found)
-			{
-				// we coldn't find any dead so stop looking
-				skip = true;
-				EmittedParticle p(position, life + Utils::Random() * liveVar);
-
-				Vector3 v = velocity;
-				v += velocityVar * Utils::Random() * 2 - velocityVar;
-				p.velocity = v;
-
-				particles.push_back(p);
-			}
+            particles.push_back(p);
 		}
+	}
 
-		/** Integrates all particles */
-		void Integrate(double dt)
-		{
-			for (int i = 0; i < particles.Size(); i++)
-			{
-				particles[i].Integrate(dt);
-			}
-		}
-	};
+	int GetNumParticles()
+	{
+	    return particles.size();
+	}
+
+	EmittedParticle &GetParticle(int i)
+	{
+	     return particles[i];
+	}
+
+    void SetPosition(Vector3 p)
+    {
+        position = p;
+    }
+
+    /** Integrates all particles */
+    void Update(double dt)
+    {
+        for (int i = 0; i < particles.size(); i++)
+        {
+            particles[i].Integrate(dt);
+        }
+    }
+};
+#endif

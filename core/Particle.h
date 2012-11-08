@@ -26,54 +26,68 @@ public:
 	{
 		return position;
 	}
-	
+
 	Vector3 GetVelocity() const
 	{
 		return velocity;
 	}
-	
+
 	Vector3 GetAcceleration() const
 	{
 		return acceleration;
 	}
-	
+
 	double GetMass() const
 	{
 		return mass;
 	}
-	
+
 	double GetDamping() const
 	{
 		return damping;
 	}
 	/* sets */
-	void SetPosition(double x, double y, double z)
+    void SetPosition(double x, double y, double z)
 	{
 		position.x = x;
 		position.y = y;
 		position.z = z;
 	}
-	
+
+	void SetPosition(Vector3 p)
+	{
+		position.x = p.x;
+		position.y = p.y;
+		position.z = p.z;
+	}
+
+	void SetVelocity(Vector3 v)
+	{
+		velocity.x = v.x;
+		velocity.y = v.y;
+		velocity.z = v.z;
+	}
+
 	void SetVelocity(double x, double y, double z)
 	{
 		velocity.x = x;
 		velocity.y = y;
 		velocity.z = z;
 	}
-	
+
 	void SetAcceleration(double x, double y, double z)
 	{
 		acceleration.x = x;
 		acceleration.y = y;
 		acceleration.z = z;
 	}
-	
+
 	void SetMass(double m)
 	{
 		mass = m;
 		invMass = 1.0/m;
 	}
-	
+
 	void SetDamping(double d)
 	{
 		damping = d;
@@ -103,7 +117,7 @@ public:
 		velocity *= pow(damping, dt);
 		ClearForces();
 	}
-	
+
 	/** print */
 	void Print() const
 	{
