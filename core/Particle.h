@@ -46,19 +46,21 @@ public:
 	{
 		return damping;
 	}
+
 	/* sets */
-    void SetPosition(double x, double y, double z)
-	{
-		position.x = x;
-		position.y = y;
-		position.z = z;
-	}
 
 	void SetPosition(Vector3 p)
 	{
 		position.x = p.x;
 		position.y = p.y;
 		position.z = p.z;
+	}
+
+    void SetPosition(double x, double y, double z)
+	{
+		position.x = x;
+		position.y = y;
+		position.z = z;
 	}
 
 	void SetVelocity(Vector3 v)

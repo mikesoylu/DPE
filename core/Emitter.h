@@ -38,17 +38,21 @@ public:
 		for (int i = 0; i < n; i++)
 		{
             // we coldn't find any dead so stop looking
-            EmittedParticle p(position, life + Util::Random() * lifeVar);
+            EmittedParticle p(this->position, life + Util::Random() * lifeVar);
 
             Vector3 v = velocity;
-            v += velocityVar * Util::Random() * 2 - velocityVar;
-            p.SetVelocity(v);
 
+            v.x += (Util::Random() * 2 - 1) * velocityVar.x;
+            v.y += (Util::Random() * 2 - 1) * velocityVar.y;
+            v.z += (Util::Random() * 2 - 1) * velocityVar.z;
+
+            p.SetVelocity(v);
             particles.push_back(p);
 		}
 	}
 
-	int GetNumParticles()
+    /** gets */
+	int GetNumParticles() const
 	{
 	    return particles.size();
 	}
@@ -58,9 +62,12 @@ public:
 	     return particles[i];
 	}
 
+    /** sets */
     void SetPosition(Vector3 p)
     {
-        position = p;
+        this->position.x = p.x;
+        this->position.y = p.y;
+        this->position.z = p.z;
     }
 
     /** Integrates all particles */

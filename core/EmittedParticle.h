@@ -13,22 +13,15 @@ protected:
 	double life;
 	bool alive;
 public:
-	EmittedParticle(Vector3 position, double life = 1)
+	EmittedParticle(Vector3 p, double life = 1) : Particle(p.x, p.y, p.z)
 	{
-		Particle(position.x, position.y, position.z);
-		this->life = life;
-		alive = true;
-	}
-	EmittedParticle(double x = 0, double y = 0, double z = 0, double life = 1)
-	{
-		Particle(x, y, z);
 		this->life = life;
 		alive = true;
 	}
 
-	void Revive(Vector3 position, double life = 1)
+	void Revive(Vector3 p, double life = 1)
 	{
-		Particle(position.x, position.y, position.z);
+		Particle(p.x, p.y, p.z);
 		this->life = life;
 		alive = true;
 	}
@@ -58,7 +51,7 @@ public:
 	/** Euler integration */
 	virtual void Integrate(double dt)
 	{
-		if (alive)
+		if (!alive)
 			return;
 
 		Particle::Integrate(dt);
