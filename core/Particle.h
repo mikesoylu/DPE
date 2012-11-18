@@ -1,6 +1,7 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
+
 #include <iostream>
 #include <cmath>
 #include "Vector3.h"
@@ -106,7 +107,7 @@ public:
 	{
 		forceAccum += force;
 	}
-
+	
 	/** Euler integration */
 	virtual void Integrate(double dt)
 	{

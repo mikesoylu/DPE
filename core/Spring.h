@@ -6,16 +6,17 @@
 #include <iostream>
 #include <cmath>
 
-class Spring
+class Spring:public ForceGenerator
 {
 protected:
-	Particle *anchorA;
-	Particle *anchorB;
 	double damping;
 	double springConstant;
 	double restDistance;
 public:
-	Spring(Particle *A, Particle *B, double restDistance, double damping = 0.2, double constant = 10)
+	Particle *anchorA;
+	Particle *anchorB;
+	
+	Spring(Particle *A, Particle *B, double restDistance, double damping = 0.2, double constant = 50)
 	{
 		this->anchorA = A;
 		this->anchorB = B;
@@ -46,7 +47,7 @@ public:
 	}
 
 	/** Apply spring forces to anchors */
-	void ApplyForces()
+	virtual void ApplyForces()
 	{
 		Vector3 dd = anchorB->GetPosition() - anchorA->GetPosition();
 		double mag = dd.Magnitude() - restDistance;
@@ -57,8 +58,9 @@ public:
 		anchorB->ApplyForce(dd * springConstant * -mag);
 
 		// damping force
-		anchorA->ApplyForce(dd * anchorA->GetVelocity() * damping);
-		anchorB->ApplyForce(dd * anchorB->GetVelocity() * damping);
+		Vector3 vd = anchorA->GetVelocity() - anchorB->GetVelocity();
+		anchorA->ApplyForce(vd * -damping);
+		anchorB->ApplyForce(vd * damping);
 	}
 };
 

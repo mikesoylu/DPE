@@ -1,51 +1,96 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+#include "core/World.h"
+#include "core/Util.h"
+#include "core/Spring.h"
+
+#include <iostream>
+
 int main()
 {
 	// Create the main rendering window
-	sf::RenderWindow App(sf::VideoMode(800, 600, 32), "Gorilla Game");
-	App.setFramerateLimit(60);
-
-	// Load the sprite image from a file
-	sf::Texture Image;
-	if (!Image.loadFromFile("assets/gorilla.png"))
-		return EXIT_FAILURE;
+	sf::RenderWindow app(sf::VideoMode(800, 600, 32), "Awesome Game");
+	app.setFramerateLimit(60);
 	
-        // Create the sprite
-	sf::Sprite Sprite(Image);
-	Sprite.setPosition(200.f, 100.f);
-	Sprite.setScale(.5f, .5f);
+	World world;
+	
+	for (int i = 0; i<20; i++)
+	{
+		Particle *p = new Particle(i, 300);
+		
+		if (0 == i)
+		{
+			p->SetMass(INFINITY);
+		} else
+		{
+			p->SetVelocity((Util::Random() - 0.5)*100,
+							(Util::Random() - 0.5)*100,
+							(Util::Random() - 0.5)*100);
+		}
+		p->SetDamping(0.5);
+		world.AddParticle(p);
+	}
+	for (int i = 0; i<world.numParticles-1; i++)
+	{
+		Spring *s = new Spring(world.particles[i], world.particles[i+1], 2, 1, 50);
+		world.AddForce(s);
+	}
 	
 	// Start game loop
-	while (App.isOpen())
+	while (app.isOpen())
 	{
 		// Process events
 		sf::Event event;
-		while (App.pollEvent(event))
+		while (app.pollEvent(event))
 		{
 			// Close window : exit
 			if (event.type == sf::Event::Closed)
-				App.close();
+			{
+				app.close();
+				
+			} else if (event.type == sf::Event::MouseMoved)
+			{
+				world.particles[0]->SetPosition(event.mouseMove.x, event.mouseMove.y, 0);
+			}
 		}
 
-		// Get elapsed time
-		float ElapsedTime = 1.0/60.0;
-
-		// Move the sprite
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))  Sprite.move(-100 * ElapsedTime, 0);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) Sprite.move( 100 * ElapsedTime, 0);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))    Sprite.move(0, -100 * ElapsedTime);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))  Sprite.move(0,  100 * ElapsedTime);
-
+		// advance time
+		world.Advance(1.0/60.0);
+		
 		// Clear screen
-		App.clear();
-
-		// Display sprite in our window
-		App.draw(Sprite);
-
+		app.clear();
+		{
+			// draw particles
+			sf::Vertex vertices[world.numParticles];
+			for (int i = 0; i<world.numParticles; i++)
+			{
+				Vector3 p = world.particles[i]->GetPosition();
+				vertices[i].position.x = p.x;
+				vertices[i].position.y = p.y;
+			}
+			app.draw(vertices, world.numParticles, sf::Points);
+		}
+		{
+			// draw forces
+			sf::Vertex vertices[world.numForces*2];
+			int j = 0;
+			for (int i = 0; i<world.numForces; i++, j+=2)
+			{
+				Spring *s = (Spring*)world.forces[i];
+				
+				Vector3 p1 = s->anchorA->GetPosition();
+				Vector3 p2 = s->anchorB->GetPosition();
+				
+				vertices[j].position.x = p1.x;
+				vertices[j].position.y = p1.y;
+				vertices[j+1].position.x = p2.x;
+				vertices[j+1].position.y = p2.y;
+			}
+			app.draw(vertices, world.numForces*2, sf::Lines);
+		}
 		// Display window contents on screen
-		App.display();
+		app.display();
 	}
 
 	return EXIT_SUCCESS;
