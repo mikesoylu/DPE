@@ -55,6 +55,10 @@ public:
 		// spring force
 		anchorA->ApplyForce(dd * springConstant * mag);
 		anchorB->ApplyForce(dd * springConstant * -mag);
+
+		// damping force
+		anchorA->ApplyForce(dd * anchorA->GetVelocity() * damping);
+		anchorB->ApplyForce(dd * anchorB->GetVelocity() * damping);
 	}
 };
 

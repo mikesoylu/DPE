@@ -11,8 +11,8 @@ int main()
 	sf::Texture Image;
 	if (!Image.loadFromFile("assets/gorilla.png"))
 		return EXIT_FAILURE;
-
-	// Create the sprite
+	
+        // Create the sprite
 	sf::Sprite Sprite(Image);
 	Sprite.setPosition(200.f, 100.f);
 	Sprite.setScale(.5f, .5f);
