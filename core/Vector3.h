@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "Util.h"
+
 using std::cout;
 using std::endl;
 
@@ -145,7 +147,12 @@ public:
 
 		return *this;
 	}
-
+	
+	bool IsValid()
+	{
+		return Util::IsValid(x) && Util::IsValid(y) && Util::IsValid(z);
+	}
+	
 	/** print */
 	void Print() const
 	{

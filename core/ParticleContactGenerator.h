@@ -18,14 +18,32 @@ protected:
 public:
 	ParticleContactGenerator(World *world)
 	{
-		numParticles = 0;
 		this->world = world;
+		numParticles = 0;
 	}
 	
 	void AddParticle(Particle *p)
 	{
 		if (numParticles<MAX_PARTICLES)
 			particles[numParticles++] = p;
+	}
+	
+	// TODO: this should return true when it should be deleted
+	/** WARNING: Does not delete the particle */
+	virtual bool RemoveParticle(Particle *p)
+	{
+		// delete particle
+		for (int i = 0; i<numParticles; i++)
+		{
+			if (particles[i] == p)
+			{
+				if (1 == numParticles)
+					numParticles = 0;
+				else
+					particles[i--] = particles[numParticles--];
+			}
+		}
+		return false;
 	}
 	
 	/** populates the contacts list in world */

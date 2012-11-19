@@ -42,6 +42,53 @@ public:
 			particles[numParticles++] = p;
 	}
 	
+	/** removes particle from everything then deletes it */
+	void RemoveParticle(Particle *p)
+	{
+		// remove from contact generators
+		for (int i = 0; i<numContactGenerators; i++)
+		{
+			if (contactGenerators[i]->RemoveParticle(p));
+			{
+				delete contactGenerators[i];
+				if (1 == numContactGenerators)
+					numContactGenerators = 0;
+				else
+				{
+					contactGenerators[i--] = contactGenerators[numContactGenerators--];
+				}
+			}
+		}
+		// remove from force generators
+		for (int i = 0; i<numForces; i++)
+		{
+			if (forces[i]->RemoveParticle(p));
+			{
+				delete forces[i];
+				if (1 == numForces)
+					numForces = 0;
+				else
+				{
+					forces[i--] = forces[numForces--];
+				}
+			}
+		}
+		// lastly remove particle
+		for (int i = 0; i<numParticles; i++)
+		{
+			if (particles[i] == p)
+			{
+				delete particles[i];
+				if (1 == numParticles)
+					numParticles = 0;
+				else
+				{
+					particles[i--] = particles[numParticles--];
+				}
+			}
+		}
+	}
+	
 	void AddForceGenerator(ForceGenerator *f)
 	{
 		if (numForces<MAX_FORCES)

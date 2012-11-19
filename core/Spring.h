@@ -3,6 +3,7 @@
 
 #include "Particle.h"
 #include "Vector3.h"
+#include "ForceGenerator.h"
 #include <iostream>
 #include <cmath>
 
@@ -45,7 +46,16 @@ public:
 	{
 		return springConstant;
 	}
-
+	
+	virtual bool RemoveParticle(Particle *p)
+	{
+		if (anchorA == p || anchorB == p)
+		{
+			return true;
+		}
+		return false;
+	}
+	
 	/** Apply spring forces to anchors */
 	virtual void ApplyForces()
 	{

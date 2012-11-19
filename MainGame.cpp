@@ -6,64 +6,95 @@
 #include "core/RodContactGenerator.h"
 #include "core/RodParticleContactGenerator.h"
 #include "core/Spring.h"
+#include "core/Util.h"
 
 #include <iostream>
+
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
 
 int main()
 {
 	// Create the main rendering window
-	sf::RenderWindow app(sf::VideoMode(800, 600, 32), "Awesome Game");
+	sf::RenderWindow app(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT, 32), "Awesome Game");
 	app.setFramerateLimit(60);
 	
-	sf::Vector2f mousePos;
+	// Mouse
+	sf::Vector2i mousePos;
+	mousePos.x = 20;
+	mousePos.y = 20;
+	sf::Mouse::setPosition(mousePos, app);
 	
+	// Physics world
 	World world;
-	ParticleContactGenerator *cg = new ParticleContactGenerator(&world);
-	for (int i = 0; i<30; i++)
-	{
-		Particle *p = new Particle(i*20, 300);
-		
-		if (0 == i)
-		{
-			p->SetMass(Util::INFINITE_MASS);
-		} else if (i<30-3)
-		{
-			p->SetVelocity((Util::Random() - 0.5)*100, (Util::Random() - 0.5)*100, 0.0);
-			cg->AddParticle(p);
-		} else if (i>30-3)
-		{
-			p->SetMass(Util::INFINITE_MASS);
-		}
-		p->SetDamping(0.9);
-		p->SetRadius(5);
-		p->SetAcceleration(0, 90.8, 0);
-		world.AddParticle(p);
-	}
-	world.AddContactGenerator(cg);
 	
-	// make rope
+	// Collision between particles
+	ParticleContactGenerator *pcg = new ParticleContactGenerator(&world);
+	world.AddContactGenerator(pcg);
+	
+	// Cable
 	RodContactGenerator *rcg = new RodContactGenerator(&world);
-	for (int i = 1; i<world.numParticles-2; i++)
-	{
-		rcg->AddRod(new Rod(world.particles[i],world.particles[i+1],10));
-	}
 	world.AddContactGenerator(rcg);
+
+	// Particles vs walls and cable
+	RodParticleContactGenerator *rpcg = new RodParticleContactGenerator(&world);
+	world.AddContactGenerator(rpcg);
+
+	// Infinite mass mouse particle
+	Particle *mouseParticle = new Particle(mousePos.x, mousePos.y, 0, Util::INFINITE_MASS);
+	mouseParticle->SetDamping(0);
+	world.AddParticle(mouseParticle);
 	
-	// add mouse joint
-	world.AddForceGenerator(new Spring(world.particles[0], world.particles[1], 0));
+	// Mouse Spring
+	Spring *mouseSpring = new Spring(mouseParticle, NULL, 0, 0.1, 100);
+	world.AddForceGenerator(mouseSpring);
+	
+	// Particles for the cable
+	Particle *lastCableParticle = NULL;
+	for (int i = 0; i<60; i++)
+	{
+		Particle *p = new Particle(mouseParticle->GetPosition().x+(i+1)*10,  mouseParticle->GetPosition().y);
+		
+		if (NULL == lastCableParticle)
+		{
+			// add mouse spring
+			mouseSpring->anchorB = p;
+		} else
+		{
+			// Add particle to cable
+			rcg->AddRod(new Rod(lastCableParticle, p, 10));
+		}
+		// set properties
+		p->SetDamping(0.99);
+		p->SetRadius(5);
+		p->SetAcceleration(0, 100, 0);
+				
+		// Add particle to contact generators
+		rpcg->AddParticle(p);
+		pcg->AddParticle(p);
+		
+		// Add particle to physics world
+		world.AddParticle(p);
+		
+		// set previous particle
+		lastCableParticle = p;
+	}
 	
 	// add walls
-	world.particles[world.numParticles-2]->SetAcceleration(0,0,0);
-	world.particles[world.numParticles-1]->SetAcceleration(0,0,0);
-	world.particles[world.numParticles-2]->SetPosition(20,300,0);
-	world.particles[world.numParticles-1]->SetPosition(780,500,0);
+	Particle *topLeft = new Particle(0, 0, 0, Util::INFINITE_MASS);
+	Particle *topRight = new Particle(WINDOW_WIDTH, 0, 0, Util::INFINITE_MASS);
+	Particle *bottomLeft = new Particle(0, WINDOW_HEIGHT, 0, Util::INFINITE_MASS);
+	Particle *bottomRight = new Particle(WINDOW_WIDTH, WINDOW_HEIGHT, 0, Util::INFINITE_MASS);
 	
-	world.particles[world.numParticles-3]->SetRadius(30);
+	world.AddParticle(topLeft);
+	world.AddParticle(topRight);
+	world.AddParticle(bottomLeft);
+	world.AddParticle(bottomRight);
 
-	RodParticleContactGenerator *rpcg = new RodParticleContactGenerator(&world);
-	rpcg->AddParticle(world.particles[world.numParticles-3]);
-	rpcg->AddRod(new Rod(world.particles[world.numParticles-2], world.particles[world.numParticles-1]));
-	world.AddContactGenerator(rpcg);
+	rpcg->AddRod(new Rod(topLeft, topRight));
+	rpcg->AddRod(new Rod(topRight, bottomRight));
+	rpcg->AddRod(new Rod(bottomLeft, bottomRight));
+	rpcg->AddRod(new Rod(topLeft, bottomLeft));
 	
 	// Start game loop
 	while (app.isOpen())
@@ -76,16 +107,14 @@ int main()
 			if (event.type == sf::Event::Closed)
 			{
 				app.close();
-				
-			} else if (event.type == sf::Event::MouseMoved)
-			{
-				mousePos.x = event.mouseMove.x;
-				mousePos.y = event.mouseMove.y;
 			}
 		}
+		// get mouse position
+		mousePos = sf::Mouse::getPosition(app);
+
+		mouseParticle->SetPosition(mousePos.x, mousePos.y, 0);
+		mouseParticle->SetVelocity(0, 0, 0);
 		
-		world.particles[0]->SetPosition(mousePos.x, mousePos.y, 0);
-		world.particles[0]->SetVelocity(0, 0, 0);
 		// advance time
 		for (int i = 0; i<20; i++)
 		{

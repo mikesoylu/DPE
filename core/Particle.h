@@ -60,9 +60,12 @@ public:
 
 	void SetPosition(Vector3 &p)
 	{
-		position.x = p.x;
-		position.y = p.y;
-		position.z = p.z;
+		if (p.IsValid())
+		{
+			position.x = p.x;
+			position.y = p.y;
+			position.z = p.z;
+		}
 	}
 
     void SetPosition(double x, double y, double z)
@@ -74,9 +77,12 @@ public:
 
 	void SetVelocity(Vector3 &v)
 	{
-		velocity.x = v.x;
-		velocity.y = v.y;
-		velocity.z = v.z;
+		if (v.IsValid())
+		{
+			velocity.x = v.x;
+			velocity.y = v.y;
+			velocity.z = v.z;
+		}
 	}
 
 	void SetVelocity(double x, double y, double z)
@@ -95,8 +101,11 @@ public:
 
 	void SetMass(double m)
 	{
-		mass = m;
-		invMass = 1.0/m;
+		if (m <= 0.001)
+		{
+			mass = m;
+			invMass = 1.0/m;
+		}
 	}
 
 	void SetDamping(double d)
@@ -124,9 +133,12 @@ public:
 	/** Euler integration */
 	virtual void Integrate(double dt)
 	{
-		position += velocity*dt;
-		velocity += (acceleration+(forceAccum*invMass))*dt;
-		velocity *= pow(damping, dt);
+		if (forceAccum.IsValid() && position.IsValid() && velocity.IsValid() && acceleration.IsValid())
+		{
+			position += velocity*dt;
+			velocity += (acceleration+(forceAccum*invMass))*dt;
+			velocity *= pow(damping, dt);
+		}
 		ClearForces();
 	}
 

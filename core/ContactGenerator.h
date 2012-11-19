@@ -1,8 +1,9 @@
 #ifndef CONTACTGENERATOR_H
 #define	CONTACTGENERATOR_H
 
-#include "World.h"
-#include "Contact.h"
+class World;
+class Contact;
+class Particle;
 
 class ContactGenerator
 {
@@ -11,6 +12,7 @@ protected:
 public:
 	void (*contactCallback)(Contact *contact);
 	virtual void GenerateContacts() = 0;
+	virtual bool RemoveParticle(Particle *p) = 0;
 };
 
 #endif
