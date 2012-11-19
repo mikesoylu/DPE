@@ -9,6 +9,7 @@
 
 class ParticleContactGenerator: public ContactGenerator
 {
+protected:
 	static const int MAX_PARTICLES = 1024;
 
 	Particle *particles[MAX_PARTICLES];

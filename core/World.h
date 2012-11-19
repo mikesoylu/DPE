@@ -3,11 +3,12 @@
 
 // forward decleration for ContactGenerator
 class World;
+class ContactGenerator;
 
 #include "Particle.h"
+#include "Contact.h"
 #include "ForceGenerator.h"
 #include "ContactGenerator.h"
-#include "Contact.h"
 
 class World
 {
@@ -41,7 +42,7 @@ public:
 			particles[numParticles++] = p;
 	}
 	
-	void AddForce(ForceGenerator *f)
+	void AddForceGenerator(ForceGenerator *f)
 	{
 		if (numForces<MAX_FORCES)
 			forces[numForces++] = f;

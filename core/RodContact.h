@@ -3,28 +3,27 @@
 
 #include "Particle.h"
 #include "Vector3.h"
+#include "Rod.h"
 
 class RodContact: public Contact
 {
 protected:
-	Particle *particleA;
-	Particle *particleB;
-	
-	double maxDistance;
+	Rod *rod;
 	
 public:
-	RodContact(Particle *pA, Particle *pB, double maxDistance)
+	RodContact(Rod *rod)
 	{
-		particleA = pA;
-		particleB = pB;
-		this->maxDistance = maxDistance;
+		this->rod = rod;
 	}
 	
 	virtual void Resolve(double dt)
 	{
+		Particle *particleA = rod->particleA;
+		Particle *particleB = rod->particleB;
+		
 		Vector3 dd = particleA->GetPosition() - particleB->GetPosition();
 		
-		double min = maxDistance;
+		double min = rod->maxDist;
 		min -= dd.Magnitude();
 		
 		Vector3 pa = particleA->GetPosition();

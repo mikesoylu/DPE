@@ -2,10 +2,10 @@
 #include <SFML/Window.hpp>
 
 #include "core/World.h"
-#include "core/Util.h"
-#include "core/Spring.h"
-#include "core/RodContactGenerator.h"
 #include "core/ParticleContactGenerator.h"
+#include "core/RodContactGenerator.h"
+#include "core/RodParticleContactGenerator.h"
+#include "core/Spring.h"
 
 #include <iostream>
 
@@ -21,32 +21,50 @@ int main()
 	ParticleContactGenerator *cg = new ParticleContactGenerator(&world);
 	for (int i = 0; i<30; i++)
 	{
-		Particle *p = new Particle(i+400, 300);
+		Particle *p = new Particle(i*20, 300);
 		
 		if (0 == i)
 		{
 			p->SetMass(Util::INFINITE_MASS);
-		} else
+		} else if (i<30-3)
 		{
 			p->SetVelocity((Util::Random() - 0.5)*100, (Util::Random() - 0.5)*100, 0.0);
 			cg->AddParticle(p);
+		} else if (i>30-3)
+		{
+			p->SetMass(Util::INFINITE_MASS);
 		}
 		p->SetDamping(0.9);
 		p->SetRadius(5);
-		p->SetAcceleration(0, 100, 0);
+		p->SetAcceleration(0, 90.8, 0);
 		world.AddParticle(p);
 	}
 	world.AddContactGenerator(cg);
 	
-	for (int i = 1; i<world.numParticles-1; i++)
+	// make rope
+	RodContactGenerator *rcg = new RodContactGenerator(&world);
+	for (int i = 1; i<world.numParticles-2; i++)
 	{
-		RodContactGenerator *cg = new RodContactGenerator(&world);
-		cg->particleA = world.particles[i];
-		cg->particleB = world.particles[i+1];
-		cg->maxDist = 10;
-		world.AddContactGenerator(cg);
+		rcg->AddRod(new Rod(world.particles[i],world.particles[i+1],10));
 	}
-	world.AddForce(new Spring(world.particles[0], world.particles[1], 0));
+	world.AddContactGenerator(rcg);
+	
+	// add mouse joint
+	world.AddForceGenerator(new Spring(world.particles[0], world.particles[1], 0));
+	
+	// add walls
+	world.particles[world.numParticles-2]->SetAcceleration(0,0,0);
+	world.particles[world.numParticles-1]->SetAcceleration(0,0,0);
+	world.particles[world.numParticles-2]->SetPosition(20,300,0);
+	world.particles[world.numParticles-1]->SetPosition(780,500,0);
+	
+	world.particles[world.numParticles-3]->SetRadius(30);
+
+	RodParticleContactGenerator *rpcg = new RodParticleContactGenerator(&world);
+	rpcg->AddParticle(world.particles[world.numParticles-3]);
+	rpcg->AddRod(new Rod(world.particles[world.numParticles-2], world.particles[world.numParticles-1]));
+	world.AddContactGenerator(rpcg);
+	
 	// Start game loop
 	while (app.isOpen())
 	{
@@ -69,9 +87,9 @@ int main()
 		world.particles[0]->SetPosition(mousePos.x, mousePos.y, 0);
 		world.particles[0]->SetVelocity(0, 0, 0);
 		// advance time
-		for (int i = 0; i<10; i++)
+		for (int i = 0; i<20; i++)
 		{
-			world.Advance(1.0/600.0);
+			world.Advance(1.0/1200.0);
 		}
 		// Clear screen
 		app.clear();

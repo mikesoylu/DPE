@@ -124,10 +124,6 @@ public:
 	/** Euler integration */
 	virtual void Integrate(double dt)
 	{
-		position.z = 0;
-		velocity.z = 0;
-
-
 		position += velocity*dt;
 		velocity += (acceleration+(forceAccum*invMass))*dt;
 		velocity *= pow(damping, dt);

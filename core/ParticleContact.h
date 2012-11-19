@@ -6,11 +6,10 @@
 
 class ParticleContact: public Contact
 {
-protected:
+public:
 	Particle *particleA;
 	Particle *particleB;
-
-public:
+	
 	ParticleContact(Particle *pA, Particle *pB)
 	{
 		particleA = pA;
