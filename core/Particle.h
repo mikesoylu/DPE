@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include "Vector3.h"
+#include "Util.h"
 
 using std::cout;
 using std::endl;
@@ -13,14 +14,16 @@ class Particle
 {
 protected:
 	Vector3 position, velocity, acceleration, forceAccum;
-	double damping, mass, invMass;
+	double damping, mass, invMass, radius;
+	
 public:
-	Particle(double x = 0, double y = 0, double z = 0, double m = 1)
+	Particle(double x = 0, double y = 0, double z = 0, double m = 1, double r = 10)
 	{
 		position = Vector3(x,y,z);
 		mass = m;
 		invMass = 1.0/m;
 		damping = 1;
+		radius = r;
 	}
 	/* gets */
 	Vector3 GetPosition() const
@@ -48,9 +51,14 @@ public:
 		return damping;
 	}
 
+	double GetRadius() const
+	{
+		return radius;
+	}
+	
 	/* sets */
 
-	void SetPosition(Vector3 p)
+	void SetPosition(Vector3 &p)
 	{
 		position.x = p.x;
 		position.y = p.y;
@@ -64,7 +72,7 @@ public:
 		position.z = z;
 	}
 
-	void SetVelocity(Vector3 v)
+	void SetVelocity(Vector3 &v)
 	{
 		velocity.x = v.x;
 		velocity.y = v.y;
@@ -96,6 +104,11 @@ public:
 		damping = d;
 	}
 
+	void SetRadius(double r)
+	{
+		radius = r;
+	}
+	
 	/** Clear forces */
 	void ClearForces()
 	{
@@ -111,10 +124,10 @@ public:
 	/** Euler integration */
 	virtual void Integrate(double dt)
 	{
-		if (0.0 == invMass)
-		{
-			cout << "ERROR:Mass is zero" << endl;
-		}
+		position.z = 0;
+		velocity.z = 0;
+
+
 		position += velocity*dt;
 		velocity += (acceleration+(forceAccum*invMass))*dt;
 		velocity *= pow(damping, dt);

@@ -4,6 +4,8 @@
 #include "core/World.h"
 #include "core/Util.h"
 #include "core/Spring.h"
+#include "core/RodContactGenerator.h"
+#include "core/ParticleContactGenerator.h"
 
 #include <iostream>
 
@@ -13,30 +15,38 @@ int main()
 	sf::RenderWindow app(sf::VideoMode(800, 600, 32), "Awesome Game");
 	app.setFramerateLimit(60);
 	
-	World world;
+	sf::Vector2f mousePos;
 	
-	for (int i = 0; i<20; i++)
+	World world;
+	ParticleContactGenerator *cg = new ParticleContactGenerator(&world);
+	for (int i = 0; i<30; i++)
 	{
-		Particle *p = new Particle(i, 300);
+		Particle *p = new Particle(i+400, 300);
 		
 		if (0 == i)
 		{
-			p->SetMass(INFINITY);
+			p->SetMass(Util::INFINITE_MASS);
 		} else
 		{
-			p->SetVelocity((Util::Random() - 0.5)*100,
-							(Util::Random() - 0.5)*100,
-							(Util::Random() - 0.5)*100);
+			p->SetVelocity((Util::Random() - 0.5)*100, (Util::Random() - 0.5)*100, 0.0);
+			cg->AddParticle(p);
 		}
-		p->SetDamping(0.5);
+		p->SetDamping(0.9);
+		p->SetRadius(5);
+		p->SetAcceleration(0, 100, 0);
 		world.AddParticle(p);
 	}
-	for (int i = 0; i<world.numParticles-1; i++)
-	{
-		Spring *s = new Spring(world.particles[i], world.particles[i+1], 2, 1, 50);
-		world.AddForce(s);
-	}
+	world.AddContactGenerator(cg);
 	
+	for (int i = 1; i<world.numParticles-1; i++)
+	{
+		RodContactGenerator *cg = new RodContactGenerator(&world);
+		cg->particleA = world.particles[i];
+		cg->particleB = world.particles[i+1];
+		cg->maxDist = 10;
+		world.AddContactGenerator(cg);
+	}
+	world.AddForce(new Spring(world.particles[0], world.particles[1], 0));
 	// Start game loop
 	while (app.isOpen())
 	{
@@ -51,13 +61,18 @@ int main()
 				
 			} else if (event.type == sf::Event::MouseMoved)
 			{
-				world.particles[0]->SetPosition(event.mouseMove.x, event.mouseMove.y, 0);
+				mousePos.x = event.mouseMove.x;
+				mousePos.y = event.mouseMove.y;
 			}
 		}
-
-		// advance time
-		world.Advance(1.0/60.0);
 		
+		world.particles[0]->SetPosition(mousePos.x, mousePos.y, 0);
+		world.particles[0]->SetVelocity(0, 0, 0);
+		// advance time
+		for (int i = 0; i<10; i++)
+		{
+			world.Advance(1.0/600.0);
+		}
 		// Clear screen
 		app.clear();
 		{
