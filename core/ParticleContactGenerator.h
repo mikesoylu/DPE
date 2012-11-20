@@ -58,7 +58,12 @@ public:
 				double min = pi->GetRadius() + pj->GetRadius();
 				if (dd.Magnitude() <= min)
 				{
-					world->AddContact(new ParticleContact(pi, pj));
+					Contact *c = new ParticleContact(pi, pj);
+					world->AddContact(c);
+					if (contactCallback)
+					{
+						contactCallback(c);
+					}
 				}
 			}
 	}

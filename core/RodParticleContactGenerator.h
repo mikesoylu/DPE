@@ -79,7 +79,12 @@ public:
 				double cross = (d%l).Magnitude();
 				if (dot > 0 && dot < rods[i]->maxDist && cross < particles[j]->GetRadius())
 				{
-					world->AddContact(new RodParticleContact(rods[i], particles[j]));
+					Contact *c = new RodParticleContact(rods[i], particles[j]);
+					world->AddContact(c);
+					if (contactCallback)
+					{
+						contactCallback(c);
+					}
 				}
 			}
 	}

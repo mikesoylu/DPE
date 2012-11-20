@@ -11,10 +11,13 @@ public:
 	
 	double maxDist;
 	
-	Rod(Particle *particleA, Particle *particleB, double maxDist = -1.0)
+	bool isStiff;
+	
+	Rod(Particle *particleA, Particle *particleB, double maxDist = -1.0, bool isStiff = false)
 	{
 		this->particleA = particleA;
 		this->particleB = particleB;
+		this->isStiff = isStiff;
 		
 		if (maxDist<0)
 		{

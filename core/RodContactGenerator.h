@@ -30,7 +30,25 @@ public:
 	virtual void GenerateContacts()
 	{
 		for (int i = 0; i < numRods; i++)
-			world->AddContact(new RodContact(rods[i]));
+		{
+			if (rods[i]->isStiff)
+			{
+				world->AddContact(new RodContact(rods[i]));
+				continue;
+			}
+			Particle *pi = rods[i]->particleA;
+			Particle *pj = rods[i]->particleB;
+			Vector3 dd = pi->GetPosition() - pj->GetPosition();
+			if (dd.Magnitude() >= rods[i]->maxDist)
+			{
+				Contact *c = new RodContact(rods[i]);
+				world->AddContact(c);
+				if (contactCallback)
+				{
+					contactCallback(c);
+				}
+			}
+		}
 	}
 	
 	// TODO: this should return true when it self should be deleted (eg. does nothing)

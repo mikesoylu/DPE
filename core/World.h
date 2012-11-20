@@ -88,6 +88,24 @@ public:
 			}
 		}
 	}
+	void RemoveForceGenerator(ForceGenerator *f)
+	{
+			// lastly remove particle
+		for (int i = 0; i<numForces; i++)
+		{
+			if (forces[i] == f)
+			{
+				if (1 == numForces)
+					numForces = 0;
+				else
+				{
+					forces[i--] = forces[--numForces];
+				}
+				delete f;
+				return;
+			}
+		}
+	}
 	
 	void AddForceGenerator(ForceGenerator *f)
 	{
