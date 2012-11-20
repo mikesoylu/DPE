@@ -48,28 +48,28 @@ public:
 		// remove from contact generators
 		for (int i = 0; i<numContactGenerators; i++)
 		{
-			if (contactGenerators[i]->RemoveParticle(p));
+			if (contactGenerators[i]->RemoveParticle(p))
 			{
 				delete contactGenerators[i];
 				if (1 == numContactGenerators)
 					numContactGenerators = 0;
 				else
 				{
-					contactGenerators[i--] = contactGenerators[numContactGenerators--];
+					contactGenerators[i--] = contactGenerators[--numContactGenerators];
 				}
 			}
 		}
 		// remove from force generators
 		for (int i = 0; i<numForces; i++)
 		{
-			if (forces[i]->RemoveParticle(p));
+			if (forces[i]->RemoveParticle(p))
 			{
 				delete forces[i];
 				if (1 == numForces)
 					numForces = 0;
 				else
 				{
-					forces[i--] = forces[numForces--];
+					forces[i--] = forces[--numForces];
 				}
 			}
 		}
@@ -83,7 +83,7 @@ public:
 					numParticles = 0;
 				else
 				{
-					particles[i--] = particles[numParticles--];
+					particles[i--] = particles[--numParticles];
 				}
 			}
 		}

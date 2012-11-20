@@ -31,7 +31,7 @@ public:
 			particles[numParticles++] = p;
 	}
 	
-	// TODO: this should return true when it should be deleted
+	// TODO: this should return true when it self should be deleted (eg. does nothing)
 	/** also deletes Rods that have the particle */
 	virtual bool RemoveParticle(Particle *p)
 	{
@@ -43,7 +43,7 @@ public:
 				if (1 == numParticles)
 					numParticles = 0;
 				else
-					particles[i--] = particles[numParticles--];
+					particles[i--] = particles[--numParticles];
 			}
 		}
 		// delete rod
@@ -55,7 +55,7 @@ public:
 				if (1 == numRods)
 					numRods = 0;
 				else
-					rods[i--] = rods[numRods--];
+					rods[i--] = rods[--numRods];
 			}
 		}
 		return false;
@@ -84,7 +84,7 @@ public:
 			}
 	}
 	
-	/** deletes rods because no one else uses them */
+	/** deletes rods because no one else uses them, world deletes particles */
 	~RodParticleContactGenerator()
 	{
 		// clear all rods

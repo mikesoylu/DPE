@@ -28,7 +28,7 @@ public:
 			particles[numParticles++] = p;
 	}
 	
-	// TODO: this should return true when it should be deleted
+	// TODO: this should return true when it self should be deleted (eg. does nothing)
 	/** WARNING: Does not delete the particle */
 	virtual bool RemoveParticle(Particle *p)
 	{
@@ -40,7 +40,7 @@ public:
 				if (1 == numParticles)
 					numParticles = 0;
 				else
-					particles[i--] = particles[numParticles--];
+					particles[i--] = particles[--numParticles];
 			}
 		}
 		return false;
