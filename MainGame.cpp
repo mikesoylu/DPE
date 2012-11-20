@@ -115,6 +115,12 @@ int main()
 		mouseParticle->SetPosition(mousePos.x, mousePos.y, 0);
 		mouseParticle->SetVelocity(0, 0, 0);
 		
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Right) && lastCableParticle)
+		{
+			world.RemoveParticle(lastCableParticle);
+			lastCableParticle = NULL;
+		}
+		
 		// advance time
 		for (int i = 0; i<20; i++)
 		{
