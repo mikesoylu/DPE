@@ -7,6 +7,8 @@
 #include "core/RodParticleContactGenerator.h"
 #include "core/Spring.h"
 #include "core/Util.h"
+#include "core/Polygon.h"
+#include "core/Emitter.h"
 
 #include <iostream>
 #include <vector>
@@ -31,8 +33,40 @@ void collide(Contact *c)
 int main()
 {
 	// Create the main rendering window
-	sf::RenderWindow app(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT, 32), "Awesome Game");
+	sf::RenderWindow app(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT, 32), "Payload");
 	app.setFramerateLimit(60);
+	app.setMouseCursorVisible(false);
+	
+	// import background Sprite
+	sf::Texture bgTexture;
+	bgTexture.loadFromFile("assets/bg.png");
+	sf::Sprite bgSprite(bgTexture);
+	
+	// import ship Sprite
+	sf::Texture shipTexture;
+	shipTexture.loadFromFile("assets/ship.png");
+	shipTexture.setSmooth(true);
+	sf::Sprite shipSprite(shipTexture);
+	shipSprite.setOrigin(shipTexture.getSize().x/2, shipTexture.getSize().y/2);
+	
+	// import cable Sprite
+	sf::Texture cableTexture;
+	cableTexture.loadFromFile("assets/cable.png");
+	sf::Sprite cableSprite(cableTexture);
+	cableSprite.setOrigin(cableTexture.getSize().x/2, cableTexture.getSize().y/2);
+	
+	// import cable Sprite
+	sf::Texture cargoTexture;
+	cargoTexture.loadFromFile("assets/cargo.png");
+	shipTexture.setSmooth(true);
+	sf::Sprite cargoSprite(cargoTexture);
+	cargoSprite.setOrigin(cargoTexture.getSize().x/2, cargoTexture.getSize().y/2);
+	
+	// import cable Sprite
+	sf::Texture flameTexture;
+	flameTexture.loadFromFile("assets/flame.png");
+	sf::Sprite flameSprite(flameTexture);
+	flameSprite.setOrigin(flameTexture.getSize().x/2, flameTexture.getSize().y/2);
 	
 	// Mouse
 	sf::Vector2i mousePos;
@@ -66,16 +100,26 @@ int main()
 	Spring *mouseSpring = new Spring(mouseParticle, NULL, 0, 0.99, 50);
 	world.AddForceGenerator(mouseSpring);
 	
-	// particles for payload
+	// create effect Particles
+	Emitter particleEmitter(Vector3(0,0,0), Vector3(0,0,0), 1, Vector3(10,10,10), 0.5);
+	for (int i = 0; i<100; i++)
+	{
+		EmittedParticle *p = new EmittedParticle(Vector3(0,0,0), 2);
+		particleEmitter.AddParticle(p);
+		world.AddParticle(p);
+	}
+	
+	// particles for cargo
+	Polygon cargo;
 	{
 		double x = WINDOW_WIDTH/2;
 		double y = WINDOW_HEIGHT/2;
-		double l = 100.0;
-		double r = l * 0.5 / 0.57735026919;
-		Particle *tri[3];
-		for (int i = 0; i<3; i++)
+		double l = 48.0;
+		double r = l * 0.5 * M_SQRT1_2;
+		Particle *tri[4];
+		for (int i = 0; i<4; i++)
 		{
-			Particle *p = new Particle(x + r*cos(M_PI*2*(i/3.0)),  y + r*sin(M_PI*2*(i/3.0)));
+			Particle *p = new Particle(x + r*cos(M_PI*2*(i/4.0)),  y + r*sin(M_PI*2*(i/4.0)));
 			// set properties
 			p->SetDamping(0.5);
 			p->SetRadius(5);
@@ -87,23 +131,26 @@ int main()
 
 			// Add particle to physics world
 			world.AddParticle(p);
+			cargo.AddParticle(p);
 			tri[i] = p;
 		}
 		
 		// these allow collision with particles
 		trpcg->AddRod(new Rod(tri[0], tri[1], l));
 		trpcg->AddRod(new Rod(tri[1], tri[2], l));
-		trpcg->AddRod(new Rod(tri[2], tri[0], l));
-		
+		trpcg->AddRod(new Rod(tri[2], tri[3], l));
+		trpcg->AddRod(new Rod(tri[3], tri[0], l));
+
 		// these hold the triangle together
 		rcg->AddRod(new Rod(tri[0], tri[1], l, true));
 		rcg->AddRod(new Rod(tri[1], tri[2], l, true));
-		rcg->AddRod(new Rod(tri[2], tri[0], l, true));
-
+		rcg->AddRod(new Rod(tri[2], tri[3], l, true));
+		rcg->AddRod(new Rod(tri[3], tri[0], l, true));
+		rcg->AddRod(new Rod(tri[0], tri[2], l*M_SQRT2, true));
 	}
 	// Particles for the cable
 	std::vector<Particle *> cable;
-	for (int i = 0; i<2; i++)
+	for (int i = 0; i<20; i++)
 	{
 		Particle *p = new Particle(mouseParticle->GetPosition().x+(i+1)*10,  mouseParticle->GetPosition().y);
 		
@@ -115,12 +162,15 @@ int main()
 		{
 			// Add particle to cable
 			rcg->AddRod(new Rod(cable[i-1], p, 4));
-			trpcg->AddParticle(p);
-			pcg->AddParticle(p);
+			if (19 == i)
+			{
+				trpcg->AddParticle(p);
+				pcg->AddParticle(p);
+			}
 		}
 		// set properties
 		p->SetDamping(0.5);
-		p->SetRadius(5);
+		p->SetRadius(2);
 		p->SetAcceleration(0, 100, 0);
 				
 		// Add particle to contact generators
@@ -196,7 +246,7 @@ int main()
 
 			// set properties
 			p->SetDamping(0.5);
-			p->SetRadius(5);
+			p->SetRadius(2);
 			p->SetAcceleration(0, 100, 0);
 
 			// Add particle to contact generators
@@ -209,12 +259,86 @@ int main()
 			cable.insert(cable.begin()+1,p);
 		}
 		// advance time
-		for (int i = 0; i<20; i++)
+		for (int i = 0; i<10; i++)
 		{
-			world.Advance(1.0/1200.0);
+			world.Advance(1.0/600.0);
 		}
+		
+		// emit particles
+		if (Util::Random()<0.5)
+		{
+			Vector3 p = cable[0]->GetPosition();
+			Vector3 dd = cable[0]->GetPosition() - cable[1]->GetPosition();
+			dd.Normalize();
+			particleEmitter.velocity = dd * -60.0;
+			dd *= 22;
+			p += (dd%Vector3(0,0,1));
+			particleEmitter.position = p;
+			particleEmitter.Emit(1);
+			p += (dd%Vector3(0,0,1))*-2.0;
+			particleEmitter.position = p;
+			particleEmitter.Emit(1);
+		}	
 		// Clear screen
 		app.clear();
+		
+		// Draw background
+		app.draw(bgSprite);
+		
+		// Draw cable
+		for (int i = 1; i<cable.size(); i++)
+		{
+			cableSprite.setPosition(cable[i]->GetPosition().x, cable[i]->GetPosition().y); 
+			app.draw(cableSprite);
+		}
+		// draw clamp spring
+		if (clampSpring)
+		{
+			Vector3 p1 = clampSpring->anchorA->GetPosition();
+			Vector3 p2 = clampSpring->anchorB->GetPosition();
+			sf::Vertex vertices[2];
+			vertices[0].position.x = p1.x;
+			vertices[0].position.y = p1.y;
+			vertices[0].color.r = 0xAA;
+			vertices[0].color.g = 0xAA;
+			vertices[0].color.b = 0xAA;
+			
+			vertices[1].position.x = p2.x;
+			vertices[1].position.y = p2.y;
+			vertices[1].color.r = 0xAA;
+			vertices[1].color.g = 0xAA;
+			vertices[1].color.b = 0xAA;
+			
+			app.draw(vertices, 2, sf::Lines);
+		}
+		
+		// draw particles
+		{
+			for (int i = 0; i<particleEmitter.numParticles; i++)
+				if (particleEmitter.particles[i]->GetAlive())
+				{
+					Vector3 p = particleEmitter.particles[i]->GetPosition();
+					double a = Util::Clamp(particleEmitter.particles[i]->GetLife(), 0, 1);
+					flameSprite.setPosition(p.x, p.y);
+					flameSprite.setScale(a, a);
+					app.draw(flameSprite);
+				}
+		}
+		
+		// draw cargo
+		Vector3 cnt = cargo.GetCenter();
+		cargoSprite.setPosition(cnt.x, cnt.y);
+		cargoSprite.setRotation(cargo.GetRotation()*180/M_PI + 90);
+		app.draw(cargoSprite);
+		
+		// draw ship
+		shipSprite.setPosition(cable.front()->GetPosition().x, cable.front()->GetPosition().y);
+		Vector3 dd = cable[0]->GetPosition() - cable[1]->GetPosition();
+		shipSprite.setRotation(atan2(dd.y,dd.x)*180/M_PI + 90);
+		app.draw(shipSprite);
+		
+		/* debug draw
+
 		{
 			// draw particles
 			sf::Vertex vertices[world.numParticles];
@@ -244,6 +368,7 @@ int main()
 			}
 			app.draw(vertices, world.numForces*2, sf::Lines);
 		}
+		*/
 		// Display window contents on screen
 		app.display();
 	}

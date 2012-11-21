@@ -5,14 +5,19 @@
 #include <vector>
 #include "EmittedParticle.h"
 #include "Vector3.h"
+#include "Util.h"
 
 using std::vector;
 
 class Emitter
 {
 protected:
-	vector<EmittedParticle> particles;
-
+	static const int MAX_PARTICLES = 512;
+	
+public:
+	EmittedParticle *particles[MAX_PARTICLES];
+	int numParticles;
+	
 	double life;
 	double lifeVar;
 
@@ -20,7 +25,6 @@ protected:
 	Vector3 velocity;
 	Vector3 velocityVar;
 
-public:
 	Emitter(Vector3 position, Vector3 velocity, double life, Vector3 velocityVar, double lifeVar)
 	{
 		this->position = position;
@@ -29,54 +33,34 @@ public:
 
 		this->life = life;
 		this->lifeVar = lifeVar;
+		numParticles = 0;
 	}
 
 	/** Emits n particles at once */
 	void Emit(int n)
 	{
-
-		for (int i = 0; i < n; i++)
+		for (int i = 0; i < numParticles; i++)
 		{
-            // we coldn't find any dead so stop looking
-            EmittedParticle p(this->position, life + Util::Random() * lifeVar);
+			EmittedParticle *p = particles[i];
+			if (!p->GetAlive() && n>0)
+            {
+				Vector3 v = velocity;
 
-            Vector3 v = velocity;
+				v.x += (Util::Random() * 2 - 1) * velocityVar.x;
+				v.y += (Util::Random() * 2 - 1) * velocityVar.y;
+				v.z += (Util::Random() * 2 - 1) * velocityVar.z;
 
-            v.x += (Util::Random() * 2 - 1) * velocityVar.x;
-            v.y += (Util::Random() * 2 - 1) * velocityVar.y;
-            v.z += (Util::Random() * 2 - 1) * velocityVar.z;
-
-            p.SetVelocity(v);
-            particles.push_back(p);
+				p->Revive(position, life);
+				p->SetVelocity(v);
+				n--;
+			}
 		}
 	}
-
-    /** gets */
-	int GetNumParticles() const
+	
+	void AddParticle(EmittedParticle *p)
 	{
-	    return particles.size();
+		if (numParticles<MAX_PARTICLES)
+			particles[numParticles++] = p;
 	}
-
-	EmittedParticle &GetParticle(int i)
-	{
-	     return particles[i];
-	}
-
-    /** sets */
-    void SetPosition(Vector3 p)
-    {
-        this->position.x = p.x;
-        this->position.y = p.y;
-        this->position.z = p.z;
-    }
-
-    /** Integrates all particles */
-    void Update(double dt)
-    {
-        for (int i = 0; i < particles.size(); i++)
-        {
-            particles[i].Integrate(dt);
-        }
-    }
 };
 #endif

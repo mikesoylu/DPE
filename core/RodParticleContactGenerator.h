@@ -72,6 +72,9 @@ public:
 		for (int i = 0; i<numRods; i++)
 			for (int j = 0; j<numParticles; j++)
 			{
+				if (rods[i]->particleA == particles[j] || rods[i]->particleA == particles[j])
+					continue;
+				
 				Vector3 l = rods[i]->particleA->GetPosition() - rods[i]->particleB->GetPosition();
 				l.Normalize();
 				Vector3 d = particles[j]->GetPosition() - rods[i]->particleB->GetPosition();

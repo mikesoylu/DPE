@@ -12,7 +12,32 @@ namespace Util
 	{
 		return (double)rand() / RAND_MAX;
 	}
-
+	
+	double Clamp(double src, double low, double hi)
+	{
+		if (src > hi)
+			src = hi;
+		if (src < low)
+			src = low;
+		return src;
+	}
+	int Clampf(int src, int low, int hi)
+	{
+		if (src > hi)
+			src = hi;
+		if (src < low)
+			src = low;
+		return src;
+	}
+	float Clampi(float src, float low, float hi)
+	{
+		if (src > hi)
+			src = hi;
+		if (src < low)
+			src = low;
+		return src;
+	}
+	
 	bool IsValid(double x)
 	{
 		if (x != x)

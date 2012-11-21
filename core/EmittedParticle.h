@@ -16,12 +16,13 @@ public:
 	EmittedParticle(Vector3 p, double life = 1) : Particle(p.x, p.y, p.z)
 	{
 		this->life = life;
-		alive = true;
+		alive = false;
 	}
 
 	void Revive(Vector3 p, double life = 1)
 	{
-		Particle(p.x, p.y, p.z);
+		position = p;
+		velocity = Vector3(0,0,0);
 		this->life = life;
 		alive = true;
 	}
