@@ -25,7 +25,7 @@ void collide(Contact *c)
 	ParticleContact *pc = (ParticleContact *)c;
 	if (NULL == clampSpring)
 	{
-		clampSpring = new Spring(pc->particleA, pc->particleB, 10, 0.5, 100);
+		clampSpring = new Spring(pc->particleA, pc->particleB, 10, 0.5, 1000);
 		world.AddForceGenerator(clampSpring);
 	}
 }
@@ -153,11 +153,18 @@ int main()
 	for (int i = 0; i<20; i++)
 	{
 		Particle *p = new Particle(mouseParticle->GetPosition().x+(i+1)*10,  mouseParticle->GetPosition().y);
+		// set properties
+		p->SetDamping(0.5);
+		p->SetRadius(2);
+		p->SetAcceleration(0, 100, 0);
 		
 		if (i == 0)
 		{
 			// add mouse spring
 			mouseSpring->anchorB = p;
+			p->SetRadius(20);
+			p->SetMass(20);
+
 		} else
 		{
 			// Add particle to cable
@@ -168,10 +175,6 @@ int main()
 				pcg->AddParticle(p);
 			}
 		}
-		// set properties
-		p->SetDamping(0.5);
-		p->SetRadius(2);
-		p->SetAcceleration(0, 100, 0);
 				
 		// Add particle to contact generators
 		rpcg->AddParticle(p);
@@ -219,11 +222,13 @@ int main()
 		mouseParticle->SetVelocity(0, 0, 0);
 		
 		// add to cable
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Right) && cable.size() > 2)
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Right) && cable.size() > 20)
 		{
 			mouseSpring->anchorB = cable[1];
 			world.RemoveParticle(cable[0]);
 			cable.erase(cable.begin());
+			cable[0]->SetRadius(20);
+			cable[0]->SetMass(20);
 		}
 		// release from cable
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Middle) && clampSpring)
@@ -237,8 +242,9 @@ int main()
 		{
 			Particle *p = new Particle(cable[1]->GetPosition().x,  cable[1]->GetPosition().y);
 
-			// Add particle to cable
+			// remove all rods attached to cable 1 (does not remove particle)
 			rcg->RemoveParticle(cable[1]);
+			// Add particle to cable
 			rcg->AddRod(new Rod(cable[1], p, 4));
 			rcg->AddRod(new Rod(cable[0], p, 4));
 			if (cable.size() > 2)
