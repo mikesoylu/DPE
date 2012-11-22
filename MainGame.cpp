@@ -344,7 +344,6 @@ int main()
 		app.draw(shipSprite);
 		
 		/* debug draw
-
 		{
 			// draw particles
 			sf::Vertex vertices[world.numParticles];

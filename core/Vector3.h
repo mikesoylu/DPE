@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <cmath>
-
 #include "Util.h"
 
 using std::cout;
