@@ -121,7 +121,7 @@ int main()
 		{
 			Particle *p = new Particle(x + r*cos(M_PI*2*(i/4.0)),  y + r*sin(M_PI*2*(i/4.0)));
 			// set properties
-			p->SetDamping(0.5);
+			p->SetDamping(0.9);
 			p->SetRadius(5);
 			p->SetMass(20);
 			p->SetAcceleration(0, 100, 0);
