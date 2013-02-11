@@ -1,4 +1,4 @@
-# DAS Physics Engine for METU GATE-541
+# DAS Physics Engine
 Simple C++ Physics Engine for METU GATE-541.
 
 ## Features
